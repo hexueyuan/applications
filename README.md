@@ -6,3 +6,6 @@ sxysh是一个web数据管理页面。这个应用开发自游戏《属性与生
 
 ## foolday
 foolday是愚人节时我写的一个娱乐应用。使用Vue+Element+python。
+
+## unicursal
+unicursal是一个一笔画游戏辅助，游戏是一个微信小程序，把地图截图之后上传到页面上，后端处理之后返回结果。使用python+图像处理实现，前端没有用框架。需要下载字体文件。
