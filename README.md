@@ -9,3 +9,6 @@ foolday是愚人节时我写的一个娱乐应用。使用Vue+Element+python。
 
 ## unicursal
 unicursal是一个一笔画游戏辅助，游戏是一个微信小程序，把地图截图之后上传到页面上，后端处理之后返回结果。使用python+图像处理实现，前端没有用框架。需要下载字体文件。
+
+## bookstore
+bookstore是一个外包项目，实现ID卡扫描RFID前端实时显示扫描图书数据。原理是树莓派连接REID，使用python三方库获取ID卡号后从数据库查询图书数据在前端显示。使用python+flask+sqlite实现后端，使用Vue+Element实现前端。
