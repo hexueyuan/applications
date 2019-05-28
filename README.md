@@ -12,3 +12,6 @@ unicursal是一个一笔画游戏辅助，游戏是一个微信小程序，把�
 
 ## bookstore
 bookstore是一个外包项目，实现ID卡扫描RFID前端实时显示扫描图书数据。原理是树莓派连接REID，使用python三方库获取ID卡号后从数据库查询图书数据在前端显示。使用python+flask+sqlite实现后端，使用Vue+Element实现前端。
+
+## qqtest
+qqtest是一个基于聚合数据提供的qq运势测试服务开发的应用，虽然qq测运势没得科学依旧，写这个主要就是为了娱乐。
