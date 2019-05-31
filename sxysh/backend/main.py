@@ -1,33 +1,19 @@
-from apps import create_app
+from apps import create_app, databaseSetup
 
 import json
 import sys
 import os
 
-def usage():
-    print "python main.py <config-file>"
-
-def getConf(path):
-    with open(path, 'r') as f:
-        return json.load(f)
-
-def argvCheck():
+if __name__ == "__main__":
     if len(sys.argv) != 2:
-        usage()
+        print "No configuration file."
         exit()
     if not os.path.exists(sys.argv[1]):
         print "{}: No such file!".format(sys.argv[1])
         exit()
 
-def convertInitDB(conf):
-    # a table
-    sql = "create table if not exists {} ();".format(conf['database']['table'])
-    cols = ""
+    conf = json.load(open(sys.argv[1], 'r'))
+    databaseSetup(conf['database'])
 
-if __name__ == "__main__":
-    argvCheck()
-    conf = getConf(sys.argv[1])
-
-    app = create_app(__name__)
-    host = conf
+    app = create_app(__name__, conf)
     app.run()

@@ -7,12 +7,12 @@
         </div>
         <el-table ref="singleTable" :data="tableData" highlight-current-row @current-change="handleRowSelect" style="width: 100%">
             <el-table-column type="index" width="100"></el-table-column>
-            <el-table-column v-for="attr in tableAttrs" v-bind:key="attr.prop" :prop="attr.prop" :label="attr.label" :width="attrWidth"></el-table-column>
+            <el-table-column v-for="attr in tableAttrs" v-bind:key="attr.prop" :prop="attr.prop" :label="attr.label" :width="attr.width"></el-table-column>
         </el-table>
         <el-dialog :visible.sync="dialogVisible" width="400px">
-            <el-form ref="form" :model="form" label-width="40px">
+            <el-form ref="form" :model="form" label-width="80px">
                 <el-form-item v-for="attr in tableAttrs" v-bind:key="attr.prop" :label="attr.label">
-                    <el-input v-model="form[attr.prop]" :disabled="mode == 'edit' && attr['primary-key']"></el-input>
+                    <el-input v-model="form[attr.prop]" :disabled="mode == 'edit' && attr['primary_key']"></el-input>
                 </el-form-item>
             </el-form>
             <el-button type="primary" @click="submitData">确定</el-button>
@@ -25,69 +25,7 @@
 export default {
     data() {
         return {
-            tableAttrs: [
-                {
-                    'label': '名称',
-                    'prop': 'name',
-                    'type': String,
-                    'primary-key': true
-                },
-                {
-                    'label': '体力',
-                    'prop': 'life',
-                    'type': Number
-                },
-                {
-                    'label': '健康',
-                    'prop': 'health',
-                    'type': Number
-                },
-                {
-                    'label': '干净',
-                    'prop': 'clean',
-                    'type': Number
-                },
-                {
-                    'label': '力量',
-                    'prop': 'power',
-                    'type': Number
-                },
-                {
-                    'label': '智慧',
-                    'prop': 'wisdom',
-                    'type': Number
-                },
-                {
-                    'label': '魅力',
-                    'prop': 'charm',
-                    'type': Number
-                },
-                {
-                    'label': '酒量',
-                    'prop': 'liqueur',
-                    'type': Number
-                },
-                {
-                    'label': '宅',
-                    'prop': 'home',
-                    'type': Number
-                },
-                {
-                    'label': '音乐',
-                    'prop': 'music',
-                    'type': Number
-                },
-                {
-                    'label': '孤独',
-                    'prop': 'lonely',
-                    'type': Number
-                },
-                {
-                    'label': '钱',
-                    'prop': 'money',
-                    'type': Number
-                }
-            ],
+            tableAttrs: [],
             //表格当前选中数据，内容是当行数据对象
             currentRow: null,
             //显示浮窗，浮窗中为form表格，被用于添加和编辑数据
@@ -129,22 +67,15 @@ export default {
             this.form = this.currentRow
             this.dialogVisible = true
         },
-        //提交数据，检查form每一项数据都存在并且格式正确，当name存在于table表中表示应该更新数据！！BAD
+        //提交数据
         //
         submitData() {
             if (this.convertData()) {
                     var data = this.form
                     if (this.mode === 'add') {
                         this.postToDB(data)
-                        this.tableData.push(data)
-                        this.alertMessage("添加成功", "success")
                     } else if (this.mode === 'edit') {
-                        var i = this.tableData.findIndex(item => {
-                            return item.name === data.name
-                        })
                         this.updateInDB(data)
-                        this.tableData[i] = data
-                        this.alertMessage("编辑成功", "success")
                     } else {
                         this.alertMessage('模式错误', 'error')
                     }
@@ -157,15 +88,6 @@ export default {
         //删除当前table中的数据
         deleteData(data) {
             this.deleteFromDB(data)
-            var i = this.tableData.findIndex(item => {
-                return item.name === data.name
-            })
-            if (i != -1) {
-                this.tableData.splice(i, 1)
-                this.alertMessage('删除成功', 'success')
-            } else {
-                this.alertMessage('未找到数据', 'error')
-            }
         },
         //取消sumbit数据
         cancleSumbitData() {
@@ -173,16 +95,72 @@ export default {
         },
         //新增数据传到后台
         postToDB(data) {
-            console.log(data)
+            var api = this.$conf.table_data_api
+            this.$axios.post(api, data).then(res => {
+                this.tableData.push(data)
+                this.alertMessage('新增数据成功', 'success')
+            }).catch(() => {
+                this.alertMessage('新增数据失败', 'error')
+            })
         },
         //删除数据传到后台
         deleteFromDB(data) {
-            console.log(data)
+            var api = this.$conf.table_data_api
+            var primary_attr = this.tableAttrs.find(one => {
+                return one['primary_key'] == true
+            })
+            var pd = {}
+            pd[primary_attr.prop] = data[primary_attr.prop]
+            this.$axios.delete(api + '?' + this.$qs.stringify(pd)).then(res => {
+                this.alertMessage('删除数据成功', 'success')
+                var i = this.tableData.findIndex(item => {
+                    return item.name === data.name
+                })
+                this.tableData.splice(i, 1)
+            }).catch(() => {
+                this.alertMessage('删除数据失败', 'error')
+            })
         },
         //更新数据传到后台
         updateInDB(data) {
-            console.log(data)
+            var api = this.$conf.table_data_api
+            this.$axios.put(api, data).then(res => {
+                this.alertMessage('修改数据成功', 'success')
+                var i = this.tableData.findIndex(item => {
+                    return item.name === data.name
+                })
+                this.tableData[i] = data
+            }).catch(() => {
+                this.alertMessage('修改数据失败', 'error')
+            })
         },
+
+        //请求表格配置
+        requestConfig() {
+            var api = this.$conf.table_config_api
+            this.$axios.get(api).then(res => {
+                this.tableAttrs = res.data.sort((a, b) => {
+                    return a.index - b.index
+                })
+                //计算列宽度
+                this.tableAttrs.forEach(element => {
+                    element.width = this.attrWidth
+                })
+                if (this.attrWidth == 180) {
+                    this.tableAttrs[this.tableAttrs.length - 1].width = undefined
+                }
+                console.log(this.tableAttrs)
+            })
+        },
+
+        //请求表格数据
+        requestData() {
+            var api = this.$conf.table_data_api
+            this.$axios.get(api).then(res => {
+                this.tableData = res.data
+            })
+        },
+
         //页面弹窗
         alertMessage(msg, type) {
             if (type == "success") {
@@ -195,18 +173,28 @@ export default {
                 this.$message(msg)
             }
         },
-        //检查数据格式
+        //转换并检查数据格式
         convertData() {
             var flag = true
             this.tableAttrs.forEach(attr => {
-                this.form[attr.prop] == attr.type(this.form[attr.prop])
-                if (attr.type === Number && isNaN(this.form[attr.prop])) {
+                var type = null
+                if (attr.type == "Integer") {
+                    type = Number
+                } else if (attr.type == "String") {
+                    type = String
+                }
+                this.form[attr.prop] = type(this.form[attr.prop])
+                if (attr.type === 'Integer' && isNaN(this.form[attr.prop])) {
                     flag = false
                 }
             });
 
             return flag
         }
+    },
+    mounted() {
+        this.requestConfig()
+        this.requestData()
     },
     watch: {
         //监控currentRow的更新来更新按钮使能
@@ -221,7 +209,12 @@ export default {
     computed: {
         attrWidth: function() {
             var browserLength = document.documentElement.clientWidth * 0.9
-            return Math.floor(browserLength / this.tableAttrs.length)
+            var width =  Math.floor(browserLength / this.tableAttrs.length)
+            if (width > 180) {
+                return 180
+            } else {
+                return width
+            }
         }
     }
 }
