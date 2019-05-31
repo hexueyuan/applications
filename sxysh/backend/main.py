@@ -16,4 +16,4 @@ if __name__ == "__main__":
     databaseSetup(conf['database'])
 
     app = create_app(__name__, conf)
-    app.run()
+    app.run(port=5051)
