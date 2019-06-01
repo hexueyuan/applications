@@ -1,20 +1,26 @@
 <template>
     <div style="margin: 20px;">
+        <!--按钮-->
         <div>
             <el-button type="success" @click="handleAddEvent">新增</el-button>
-            <el-button type="danger" @click="handleDeleteEvent" :disabled="disableDeleteAndEdit">删除</el-button>
-            <el-button type="primary" @click="handleEditEvent" :disabled="disableDeleteAndEdit">编辑</el-button>
+            <!--删除和编辑按钮应该在选中行的模式下启用-->
+            <el-button type="danger"  @click="handleDeleteEvent" :disabled="disableDeleteAndEdit">删除</el-button>
+            <el-button type="primary" @click="handleEditEvent"   :disabled="disableDeleteAndEdit">编辑</el-button>
         </div>
+        <!--表格主体-->
         <el-table ref="singleTable" :data="tableData" highlight-current-row @current-change="handleRowSelect" style="width: 100%">
             <el-table-column type="index" width="100"></el-table-column>
             <el-table-column v-for="attr in tableAttrs" v-bind:key="attr.prop" :prop="attr.prop" :label="attr.label" :width="attr.width"></el-table-column>
         </el-table>
-        <el-dialog :visible.sync="dialogVisible" width="400px">
+        <!--弹窗-->
+        <el-dialog :visible.sync="dialogVisible" :show-close="false"  :close-on-press-escape="false" :close-on-click-modal="false" width="400px">
+            <!--form根据配置生成-->
             <el-form ref="form" :model="form" label-width="80px">
                 <el-form-item v-for="attr in tableAttrs" v-bind:key="attr.prop" :label="attr.label">
                     <el-input v-model="form[attr.prop]" :disabled="mode == 'edit' && attr['primary_key']"></el-input>
                 </el-form-item>
             </el-form>
+            <!--确定和取消按钮-->
             <el-button type="primary" @click="submitData">确定</el-button>
             <el-button type="danger" @click="cancleSumbitData" plain>取消</el-button>
         </el-dialog>
@@ -39,9 +45,7 @@ export default {
             //禁能删除和编辑，未选中行时不能删除和编辑数据
             disableDeleteAndEdit: true,
             //表格数据绑定
-            tableData: [
-                {'name': 'test', 'life': 1, 'health': 2, 'clean': 3, 'power': 4, 'wisdom': 5, 'charm': 6, 'liqueur': 7, 'home': 8, 'music': 9, 'lonely': 10, 'money': 11}
-            ]
+            tableData: []
         }
     },
     methods: {
@@ -68,10 +72,11 @@ export default {
             this.dialogVisible = true
         },
         //提交数据
-        //
         submitData() {
             if (this.convertData()) {
                     var data = this.form
+                    //新增模式和编辑模式
+                    //编辑模式下主键不可写
                     if (this.mode === 'add') {
                         this.postToDB(data)
                     } else if (this.mode === 'edit') {
@@ -91,6 +96,8 @@ export default {
         },
         //取消sumbit数据
         cancleSumbitData() {
+            //清空form
+            this.form = {}
             this.dialogVisible = false
         },
         //新增数据传到后台
@@ -173,6 +180,7 @@ export default {
                 this.$message(msg)
             }
         },
+
         //转换并检查数据格式
         convertData() {
             var flag = true
@@ -193,6 +201,7 @@ export default {
         }
     },
     mounted() {
+        //当页面被挂载时请求配置和数据
         this.requestConfig()
         this.requestData()
     },
@@ -207,11 +216,15 @@ export default {
         }
     },
     computed: {
+        //计算列宽
+        //当列过多时设置滑动
         attrWidth: function() {
             var browserLength = document.documentElement.clientWidth * 0.9
             var width =  Math.floor(browserLength / this.tableAttrs.length)
             if (width > 180) {
                 return 180
+            }else if (width < 60) {
+                return 100
             } else {
                 return width
             }
@@ -219,7 +232,3 @@ export default {
     }
 }
 </script>
-
-<style>
-
-</style>

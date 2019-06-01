@@ -1,9 +1,9 @@
 #!/bin/bash
 
-PWD=$(pwd)
+CRTPWD=$(pwd)
 
-cd ${PWD}/backend
+cd ${CRTPWD}/backend
 python main.py ../conf/application.cfg &
 
-cd ${PWD}/frontend
+cd ${CRTPWD}/frontend
 npm run dev &
